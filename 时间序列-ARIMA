@@ -1,0 +1,38 @@
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import itertools
+import warnings
+
+df = pd.read_excel('C:/Users/P/Desktop/月份-测试量.xlsx')
+
+train = df[0:24]
+test = df[23:]
+
+df.index = pd.to_datetime(df['月份'], format='%m-%Y')
+train.index = pd.to_datetime(train['月份'], format='%m-%Y')
+test.index = pd.to_datetime(test['月份'], format='%m-%Y')
+
+df=df['Count']
+#找合适的p d q
+#初始化 p d q
+p=d=q=range(0,12)
+#产生不同的pdq元组,得到 p d q 全排列
+pdq=list(itertools.product(p,d,q))
+seasonal_pdq=[(x[0],x[1],x[2],12) for x in pdq]
+
+for param in pdq:
+    for param_seasonal in seasonal_pdq:
+        try:
+            mod = sm.tsa.statespace.SARIMAX(df[0:24],
+                                            order=param,
+                                            seasonal_order=param_seasonal,
+                                            enforce_stationarity=False,
+                                            enforce_invertibility=False)
+ 
+            results = mod.fit()
+    
+            print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
+        except:
+            continue
