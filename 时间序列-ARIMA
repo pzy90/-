@@ -4,24 +4,39 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import itertools
 import warnings
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
-df = pd.read_excel('C:/Users/P/Desktop/月份-测试量.xlsx')
-
-train = df[0:24]
-test = df[23:]
+df = pd.read_excel('C:/Users/pzy/Desktop/月份-测试量.xlsx')
 
 df.index = pd.to_datetime(df['月份'], format='%m-%Y')
-train.index = pd.to_datetime(train['月份'], format='%m-%Y')
-test.index = pd.to_datetime(test['月份'], format='%m-%Y')
-
 df=df['Count']
-#找合适的p d q
-#初始化 p d q
-p=d=q=range(0,12)
-#产生不同的pdq元组,得到 p d q 全排列
-pdq=list(itertools.product(p,d,q))
-seasonal_pdq=[(x[0],x[1],x[2],12) for x in pdq]
 
+def draw_acf_pacf(ts):
+    f = plt.figure(facecolor='white')
+    ax1 = f.add_subplot(211)
+    plot_acf(ts, lags=23, ax=ax1)
+    ax2 = f.add_subplot(212)
+    plot_pacf(ts, lags=23, ax=ax2)
+    plt.show()
+
+
+'''
+fig = plt.figure(figsize=(12,8))
+ax1= fig.add_subplot(111)
+diff1 = df.diff(1)
+diff1.plot(ax=ax1)
+
+fig = plt.figure(figsize=(12,8))
+ax2= fig.add_subplot(111)
+diff2 = df.diff(2)
+diff2.plot(ax=ax2)
+'''
+
+dta= df.diff(1)#我们已经知道要使用一阶差分的时间序列，之前判断差分的程序可以注释掉
+draw_acf_pacf(df)
+
+'''
+seasonal_pdq=[(x[0],x[1],x[2],12) for x in pdq]
 for param in pdq:
     for param_seasonal in seasonal_pdq:
         try:
@@ -36,3 +51,4 @@ for param in pdq:
             print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
         except:
             continue
+'''
