@@ -1,0 +1,37 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from statsmodels.tsa.api import ExponentialSmoothing
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+
+# Subsetting the dataset
+# Index 11856 marks the end of year 2013
+df = pd.read_excel('C:/Users/P/Desktop/月份-测试量.xlsx')
+
+# Creating train and test set
+# Index 10392 marks the end of October 2013
+train = df[0:24]
+test = df[23:]
+
+df.index = pd.to_datetime(df['月份'], format='%m-%Y')
+train.index = pd.to_datetime(train['月份'], format='%m-%Y')
+test.index = pd.to_datetime(test['月份'], format='%m-%Y')
+
+#Plotting data
+#train.Count.plot(figsize=(15,8), title= 'Daily Ridership', fontsize=14)
+#test.Count.plot(figsize=(15,8), title= 'Daily Ridership', fontsize=14)
+#plt.show()
+ 
+y_hat_avg = test.copy()
+fit1 = ExponentialSmoothing(np.asarray(train['Count']), seasonal_periods=12, trend='add', seasonal='add', ).fit()
+y_hat_avg['Holt_Winter'] = fit1.forecast(len(test))
+plt.figure(figsize=(15, 8))
+plt.plot(train['Count'], label='Train')
+plt.plot(test['Count'], label='Test')
+plt.plot(y_hat_avg['Holt_Winter'], label='Holt_Winter')
+plt.legend(loc='best')
+plt.show()
+
+print(y_hat_avg['Holt_Winter'])
